@@ -95,10 +95,11 @@ header .container {
     background: none;
     border: none;
     font-size: 24px;
-    color: var(--dark-color);
+    color: #333;
     cursor: pointer;
-    padding: 5px 10px;
     z-index: 1001;
+    padding: 10px;
+    position: relative;
 }
 
 .logo h1 {
@@ -414,13 +415,26 @@ footer p {
 @media (max-width: 992px) {
     .menu-toggle {
         display: block;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 1002;
     }
-    
+
+    .menu-toggle i {
+        font-size: 28px;
+        color: #333;
+        transition: transform 0.3s ease;
+    }
+    .menu-toggle.active i {
+        transform: rotate(90deg);
+    }
+
     .main-nav {
         position: fixed;
         top: 0;
         right: -100%;
-        width: 70%;
+        width: 80%;
         max-width: 300px;
         height: 100vh;
         background-color: white;
@@ -428,28 +442,50 @@ footer p {
         transition: right 0.3s ease-in-out;
         z-index: 1000;
         padding: 80px 20px 20px;
+        display: flex;
         flex-direction: column;
-        justify-content: flex-start;
+        overflow-y: auto;
     }
-    
+
     .main-nav.active {
         right: 0;
     }
-    
+
     .nav-links {
         flex-direction: column;
         width: 100%;
+        padding: 0;
+        margin: 0;
     }
-    
+
     .nav-links li {
         margin: 10px 0 !important;
         width: 100%;
+        padding: 0;
     }
-    
+
     .nav-links a {
         display: block;
-        padding: 10px 0;
+        padding: 12px 15px;
         width: 100%;
+        color: var(--dark-color);
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+
+    .nav-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    .nav-overlay.active {
+        display: block;
     }
 }
 
