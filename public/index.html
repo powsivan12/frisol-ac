@@ -1,46 +1,131 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Vercel Test</title>
+    <title>Vercel Python Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             line-height: 1.6;
         }
         .success {
-            color: green;
+            color: #2e7d32;
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #2e7d32;
         }
         .error {
-            color: red;
+            color: #c62828;
+            background-color: #ffebee;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #c62828;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #1565c0;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #1976d2;
+        }
+        .loading {
+            color: #1976d2;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <h1>Vercel Static Site Test</h1>
-    <p>If you can see this, your static site is working!</p>
+    <h1>Vercel Python Test</h1>
+    <p>This page tests the connection to the Python backend.</p>
     
-    <h2>Test Python Backend</h2>
+    <h2>Test Backend Connection</h2>
     <button id="testPython">Test Python Backend</button>
-    <pre id="result">Click the button to test the Python backend</pre>
+    
+    <h3>Response:</h3>
+    <div id="result" class="loading">Click the button to test the backend</div>
+    
+    <h3>Raw Response:</h3>
+    <pre id="rawResponse"></pre>
 
     <script>
-        document.getElementById('testPython').addEventListener('click', async () => {
+        async function testBackend() {
             const result = document.getElementById('result');
-            result.textContent = 'Testing...';
+            const rawResponse = document.getElementById('rawResponse');
+            
+            // Show loading state
+            result.className = 'loading';
+            result.textContent = 'Testing connection to /api/hello...';
+            rawResponse.textContent = '';
             
             try {
+                // Make the request
+                const startTime = Date.now();
                 const response = await fetch('/api/hello');
-                const data = await response.json();
-                result.textContent = JSON.stringify(data, null, 2);
-                result.className = response.ok ? 'success' : 'error';
+                const responseTime = Date.now() - startTime;
+                
+                // Try to parse as JSON first
+                let responseData;
+                let responseText = await response.text();
+                
+                // Display raw response
+                rawResponse.textContent = responseText;
+                
+                try {
+                    responseData = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error(`Invalid JSON response: ${responseText.substring(0, 200)}...`);
+                }
+                
+                // Format the response
+                if (response.ok) {
+                    result.className = 'success';
+                    result.innerHTML = `
+                        <p>✅ Backend is working! (${responseTime}ms)</p>
+                        <p>Status: ${response.status} ${response.statusText}</p>
+                        <p>Python Version: ${responseData.python_version || 'Unknown'}</p>
+                    `;
+                } else {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}\n${JSON.stringify(responseData, null, 2)}`);
+                }
+                
             } catch (error) {
-                result.textContent = `Error: ${error.message}`;
                 result.className = 'error';
+                result.innerHTML = `
+                    <p>❌ Error connecting to backend:</p>
+                    <p>${error.message}</p>
+                    <p>Check the browser's developer console (F12) for more details.</p>
+                `;
+                console.error('Backend test failed:', error);
             }
-        });
+        }
+        
+        // Attach event listener
+        document.getElementById('testPython').addEventListener('click', testBackend);
+        
+        // Test the backend automatically when the page loads
+        // window.addEventListener('load', testBackend);
     </script>
 </body>
 </html>

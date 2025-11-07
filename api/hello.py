@@ -1,43 +1,71 @@
 import os
 import sys
+import json
+
+def create_response(status_code, body):
+    """Helper function to create a properly formatted response."""
+    if isinstance(body, dict):
+        body_str = json.dumps(body, ensure_ascii=False)
+    else:
+        body_str = str(body)
+    
+    return {
+        'statusCode': status_code,
+        'headers': {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type'
+        },
+        'body': body_str
+    }
 
 def handler(event, context):
     try:
-        # Simple response that should always work
-        response = {
+        # Log the incoming request
+        print(f"Received event: {json.dumps(event, default=str)}")
+        
+        # Simple response with minimal dependencies
+        response_data = {
             'status': 'success',
             'message': 'Hello from Vercel Python!',
             'python_version': sys.version.split()[0],
         }
         
-        # Try to get additional info, but don't fail if it doesn't work
+        # Add system info if possible
         try:
-            response.update({
+            response_data.update({
                 'cwd': os.getcwd(),
                 'files_in_root': os.listdir('.'),
                 'python_path': sys.path
             })
         except Exception as e:
-            response['warning'] = f'Could not get system info: {str(e)}'
+            response_data['warning'] = f'Could not get system info: {str(e)}'
         
-        return {
-            'statusCode': 200,
-            'headers': {'Content-Type': 'application/json'},
-            'body': str(response)  # Convert to string to avoid JSON serialization issues
-        }
+        return create_response(200, response_data)
         
     except Exception as e:
-        # Minimal error handling to avoid any potential issues
-        return {
-            'statusCode': 500,
-            'body': str({
-                'status': 'error',
-                'error': str(e),
-                'type': type(e).__name__
-            })
+        # Return a properly formatted error response
+        error_info = {
+            'status': 'error',
+            'error': str(e),
+            'type': type(e).__name__,
+            'python_version': sys.version.split()[0]
         }
+        print(f"Error in handler: {error_info}")
+        return create_response(500, error_info)
 
 # For local testing
 if __name__ == '__main__':
-    print('Local test:')
-    print(handler({}, {}))
+    # Test the handler locally
+    test_event = {
+        'httpMethod': 'GET',
+        'path': '/api/hello',
+        'headers': {},
+        'queryStringParameters': None,
+        'body': None
+    }
+    
+    print("Local test:")
+    result = handler(test_event, {})
+    print(json.dumps(result, indent=2))
