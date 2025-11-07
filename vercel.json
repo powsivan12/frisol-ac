@@ -2,22 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "test.py",
+      "src": "minimal_clean.py",
       "use": "@vercel/python"
-    },
-    {
-      "src": "static/**",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "templates/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/test.py"
+      "dest": "/minimal_clean.py"
     }
   ]
 }
