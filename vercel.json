@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "minimal_clean.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/minimal_clean.py"
+      "dest": "/api/index.py"
     }
   ]
 }
