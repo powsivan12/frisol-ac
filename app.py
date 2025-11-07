@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, current_app, send_from_directory, send_file
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, current_app, send_from_directory, send_file, abort
 from flask_wtf import FlaskForm, CSRFProtect
 from wtforms import StringField, TextAreaField, EmailField, TelField
 from wtforms.validators import DataRequired, Email, Length
@@ -49,22 +49,27 @@ class ContactForm(FlaskForm):
 # Ruta para archivos estáticos
 @app.route('/static/<path:path>')
 def serve_static(path):
-    return send_from_directory('static', path)
+    try:
+        return send_from_directory('static', path)
+    except FileNotFoundError:
+        abort(404)
 
 # Ruta para favicon
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    try:
+        return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    except FileNotFoundError:
+        return '', 404
 
 # Ruta principal
 @app.route('/')
 def index():
     try:
-        form = ContactForm()
-        return render_template('index.html', form=form)
+        return render_template('index.html')
     except Exception as e:
         app.logger.error(f'Error en la ruta principal: {str(e)}')
-        return 'Error interno del servidor', 500
+        return f'Error interno del servidor: {str(e)}', 500
 
 # Ruta para manejar el envío del formulario
 @app.route('/enviar-mensaje', methods=['GET', 'POST'])
