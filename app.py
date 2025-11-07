@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, current_app, send_from_directory
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, current_app, send_from_directory, send_file
 from flask_wtf import FlaskForm, CSRFProtect
 from wtforms import StringField, TextAreaField, EmailField, TelField
 from wtforms.validators import DataRequired, Email, Length
@@ -46,11 +46,25 @@ class ContactForm(FlaskForm):
     message = TextAreaField('Mensaje', validators=[DataRequired('Por favor ingrese su mensaje'),
                                                  Length(max=1000, message='El mensaje no puede tener más de 1000 caracteres')])
 
+# Ruta para archivos estáticos
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
+
+# Ruta para favicon
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 # Ruta principal
 @app.route('/')
 def index():
-    form = ContactForm()
-    return render_template('index.html', form=form)
+    try:
+        form = ContactForm()
+        return render_template('index.html', form=form)
+    except Exception as e:
+        app.logger.error(f'Error en la ruta principal: {str(e)}')
+        return 'Error interno del servidor', 500
 
 # Ruta para manejar el envío del formulario
 @app.route('/enviar-mensaje', methods=['GET', 'POST'])
