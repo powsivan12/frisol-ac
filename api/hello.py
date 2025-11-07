@@ -1,41 +1,43 @@
-import json
+import os
 import sys
-
-def log(message):
-    print(f"[HELLO] {message}", file=sys.stderr)
-    sys.stderr.flush()
 
 def handler(event, context):
     try:
-        log("Handler called")
-        log(f"Event: {event}")
-        log(f"Context: {context}")
+        # Simple response that should always work
+        response = {
+            'status': 'success',
+            'message': 'Hello from Vercel Python!',
+            'python_version': sys.version.split()[0],
+        }
         
-        return {
-            'statusCode': 200,
-            'headers': {'Content-Type': 'application/json'},
-            'body': json.dumps({
-                'status': 'success',
-                'message': 'Hello from Vercel!',
-                'python_version': sys.version,
+        # Try to get additional info, but don't fail if it doesn't work
+        try:
+            response.update({
                 'cwd': os.getcwd(),
                 'files_in_root': os.listdir('.'),
                 'python_path': sys.path
             })
+        except Exception as e:
+            response['warning'] = f'Could not get system info: {str(e)}'
+        
+        return {
+            'statusCode': 200,
+            'headers': {'Content-Type': 'application/json'},
+            'body': str(response)  # Convert to string to avoid JSON serialization issues
         }
+        
     except Exception as e:
-        log(f"Error in handler: {str(e)}")
-        import traceback
+        # Minimal error handling to avoid any potential issues
         return {
             'statusCode': 500,
-            'body': json.dumps({
+            'body': str({
                 'status': 'error',
                 'error': str(e),
-                'traceback': traceback.format_exc(),
-                'python_path': sys.path
+                'type': type(e).__name__
             })
         }
 
 # For local testing
 if __name__ == '__main__':
+    print('Local test:')
     print(handler({}, {}))

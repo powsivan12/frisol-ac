@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vercel Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vercel Static Site Test</h1>
+    <p>If you can see this, your static site is working!</p>
+    
+    <h2>Test Python Backend</h2>
+    <button id="testPython">Test Python Backend</button>
+    <pre id="result">Click the button to test the Python backend</pre>
+
+    <script>
+        document.getElementById('testPython').addEventListener('click', async () => {
+            const result = document.getElementById('result');
+            result.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/hello');
+                const data = await response.json();
+                result.textContent = JSON.stringify(data, null, 2);
+                result.className = response.ok ? 'success' : 'error';
+            } catch (error) {
+                result.textContent = `Error: ${error.message}`;
+                result.className = 'error';
+            }
+        });
+    </script>
+</body>
+</html>
