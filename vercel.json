@@ -2,11 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "wsgi.py",
-      "use": "@vercel/python"
+      "src": "app-minimal.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "pythonVersion": "3.9"
+      }
     },
     {
       "src": "static/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "templates/**",
       "use": "@vercel/static"
     }
   ],
@@ -17,7 +25,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/wsgi.py"
+      "dest": "/app-minimal.py"
     }
   ]
 }

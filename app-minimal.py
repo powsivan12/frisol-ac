@@ -1,15 +1,25 @@
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, send_from_directory, render_template_string
 import os
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 
-# Ruta principal
+# Ruta de prueba simple
 @app.route('/')
-def index():
+def home():
     try:
-        return render_template('index.html')
+        # Intenta leer el archivo index.html directamente
+        with open('templates/index.html', 'r', encoding='utf-8') as f:
+            return f.read()
     except Exception as e:
-        return f'Error: {str(e)}', 500
+        # Si falla, muestra un mensaje de error con información
+        error_msg = f"""
+        <h1>Error al cargar la aplicación</h1>
+        <p>Error: {str(e)}</p>
+        <p>Directorio actual: {os.getcwd()}</p>
+        <p>Contenido del directorio: {os.listdir('.')}</p>
+        <p>Contenido de templates: {os.listdir('templates') if os.path.exists('templates') else 'No existe la carpeta templates'}</p>
+        """
+        return error_msg, 500
 
 # Ruta para archivos estáticos
 @app.route('/static/<path:path>')
