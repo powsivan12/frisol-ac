@@ -1,37 +1,65 @@
-from flask import Flask, send_from_directory
 import os
+import sys
+from flask import Flask, send_from_directory, jsonify
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+def create_app():
+    # Crear la aplicación Flask
+    app = Flask(__name__, 
+               static_folder=os.path.abspath('static'),
+               template_folder=os.path.abspath('templates'))
+    
+    # Configuración básica
+    app.config.update(
+        ENV='production',
+        DEBUG=False,
+        PREFERRED_URL_SCHEME='https',
+        SERVER_NAME=os.environ.get('VERCEL_URL', 'localhost:5000')
+    )
+    
+    # Registrar rutas
+    @app.route('/')
+    def index():
+        try:
+            return send_from_directory(app.template_folder, 'index.html')
+        except Exception as e:
+            app.logger.error(f"Error al cargar index.html: {str(e)}")
+            return jsonify({
+                'error': str(e),
+                'type': type(e).__name__,
+                'cwd': os.getcwd(),
+                'templates': os.listdir(app.template_folder) if os.path.exists(app.template_folder) else 'No existe',
+                'static': os.listdir(app.static_folder) if os.path.exists(app.static_folder) else 'No existe'
+            }), 500
+    
+    @app.route('/static/<path:path>')
+    def serve_static(path):
+        return send_from_directory(app.static_folder, path)
+    
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(
+            app.static_folder, 
+            'favicon.ico', 
+            mimetype='image/vnd.microsoft.icon'
+        )
+    
+    # Manejador de errores
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({'error': 'No encontrado', 'message': str(error)}), 404
+    
+    @app.errorhandler(500)
+    def server_error(error):
+        return jsonify({
+            'error': 'Error interno del servidor',
+            'message': str(error),
+            'type': type(error).__name__
+        }), 500
+    
+    return app
 
-# Configuración básica
-app.config['ENV'] = 'production'
-app.config['DEBUG'] = False
-
-# Ruta principal
-@app.route('/')
-def hello():
-    try:
-        # Intenta servir el archivo index.html directamente
-        return send_from_directory('templates', 'index.html')
-    except Exception as e:
-        # Si falla, muestra un mensaje de error con información
-        error_msg = f"""
-        <h1>Error al cargar la aplicación</h1>
-        <p>Error: {str(e)}</p>
-        <p>Directorio actual: {os.getcwd()}</p>
-        <p>Contenido del directorio: {os.listdir('.')}</p>
-        """
-        return error_msg, 500
-
-# Ruta para archivos estáticos
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
-
-# Ruta para favicon
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+# Crear la aplicación
+app = create_app()
 
 # Punto de entrada para ejecutar la aplicación localmente
 if __name__ == '__main__':
@@ -41,4 +69,6 @@ if __name__ == '__main__':
     print(f"Contenido del directorio: {os.listdir('.')}")
     if os.path.exists('templates'):
         print(f"Contenido de templates: {os.listdir('templates')}")
+    if os.path.exists('static'):
+        print(f"Contenido de static: {os.listdir('static')}")
     app.run(host='0.0.0.0', port=port)
