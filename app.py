@@ -1,19 +1,32 @@
-from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, current_app
+from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, current_app, send_from_directory
 from flask_wtf import FlaskForm, CSRFProtect
 from wtforms import StringField, TextAreaField, EmailField, TelField
 from wtforms.validators import DataRequired, Email, Length
 import os
+import logging
 from dotenv import load_dotenv
-from whatsapp_service import WhatsAppService
+
+# Configurar logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Cargar variables de entorno
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'una_clave_secreta_muy_segura')
+
+# Configuración para producción
+app.config['ENV'] = 'production'
+app.config['DEBUG'] = False
 
 # Inicializar la protección CSRF
 csrf = CSRFProtect(app)
+
+# Configurar el logger
+gunicorn_logger = logging.getLogger('gunicorn.error')
+app.logger.handlers = gunicorn_logger.handlers if gunicorn_logger.handlers else []
+app.logger.setLevel(gunicorn_logger.level if gunicorn_logger else logging.INFO)
 
 # Configuración del servidor de correo
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
