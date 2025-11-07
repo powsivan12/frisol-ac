@@ -82,7 +82,20 @@
             try {
                 // Make the request
                 const startTime = Date.now();
-                const response = await fetch('/api/hello');
+                // Try both with and without the .py extension
+                let response;
+                try {
+                    // First try with .py extension
+                    response = await fetch('/api/hello.py');
+                    
+                    // If we get a 404, try without .py
+                    if (response.status === 404) {
+                        response = await fetch('/api/hello');
+                    }
+                } catch (e) {
+                    // If that fails, try the direct path
+                    response = await fetch('/api/hello');
+                }
                 const responseTime = Date.now() - startTime;
                 
                 // Try to parse as JSON first
