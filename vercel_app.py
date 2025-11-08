@@ -1,44 +1,50 @@
-"""Minimal Flask application for Vercel deployment."""
+"""Flask application for Vercel deployment."""
 import os
 import sys
+from flask import Flask, jsonify, Response, send_from_directory
+
+# Configuración de rutas
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
 def log(message):
     """Log a message to stderr."""
     print(f"[APP] {message}", file=sys.stderr)
     sys.stderr.flush()
 
+# Asegurarse de que las rutas estén en el path
+sys.path.append(BASE_DIR)
+
 # Try to import Flask
 try:
-    from flask import Flask, jsonify, Response
-    
-    app = Flask(__name__)
+    app = Flask(__name__, 
+               static_folder=STATIC_DIR,
+               template_folder=TEMPLATE_DIR)
     
     @app.route('/')
     def home():
-        """Root endpoint that returns system information."""
+        """Root endpoint that serves index.html."""
         try:
-            info = {
-                'status': 'success',
-                'message': 'Minimal Flask app is working!',
-                'python_version': sys.version,
-                'current_working_directory': os.getcwd(),
-                'files_in_root': os.listdir('.'),
-                'python_path': sys.path
-            }
-            log("Home endpoint called successfully")
-            return jsonify(info)
+            return send_from_directory(TEMPLATE_DIR, 'index.html')
         except Exception as e:
-            log(f"Error in home endpoint: {str(e)}")
+            log(f"Error serving index.html: {str(e)}")
             return jsonify({
                 'status': 'error',
                 'error': str(e),
                 'type': type(e).__name__
             }), 500
     
-    @app.route('/favicon.ico')
-    def favicon():
-        """Handle favicon requests."""
-        return Response(status=204)  # No content
+    @app.route('/<path:path>')
+    def serve_static(path):
+        """Serve static files."""
+        try:
+            if os.path.exists(os.path.join(STATIC_DIR, path)):
+                return send_from_directory(STATIC_DIR, path)
+            return jsonify({"error": "Not found"}), 404
+        except Exception as e:
+            log(f"Error serving static file {path}: {str(e)}")
+            return jsonify({"error": str(e)}), 500
     
     @app.errorhandler(500)
     def handle_500(error):
