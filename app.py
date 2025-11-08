@@ -12,12 +12,16 @@ load_dotenv()
 # Configuración de la aplicación Flask
 app = Flask(__name__, 
             template_folder='templates',
-            static_folder='static',
-            static_url_path='')
+            static_folder='static')
 
 # Configuración para producción
 app.config['PREFERRED_URL_SCHEME'] = 'https'
 app.config['SERVER_NAME'] = None  # Se establecerá dinámicamente
+
+# Ruta para servir archivos estáticos
+@app.route('/static/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
 
 # Configuración del correo
 MAIL_SERVER = 'smtp.gmail.com'
