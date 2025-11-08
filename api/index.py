@@ -11,6 +11,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
+log(f"Iniciando aplicación en {BASE_DIR}")
+log(f"TEMPLATE_DIR: {TEMPLATE_DIR}")
+log(f"STATIC_DIR: {STATIC_DIR}")
+
 # Crear la aplicación Flask
 app = Flask(__name__, 
            static_folder=STATIC_DIR,
@@ -19,59 +23,70 @@ app = Flask(__name__,
 @app.route('/')
 def home():
     try:
-        log(f"Sirviendo index.html desde: {TEMPLATE_DIR}")
-        # Verificar si el archivo existe
-        if not os.path.exists(os.path.join(TEMPLATE_DIR, 'index.html')):
+        log("Acceso a la ruta raíz")
+        index_path = os.path.join(TEMPLATE_DIR, 'index.html')
+        log(f"Intentando servir: {index_path}")
+        
+        if not os.path.exists(index_path):
             raise FileNotFoundError(f"No se encontró index.html en {TEMPLATE_DIR}")
+            
         return send_from_directory(TEMPLATE_DIR, 'index.html')
     except Exception as e:
         log(f"Error en home(): {str(e)}")
-        return jsonify({"error": str(e), "cwd": os.getcwd()}), 500
+        return jsonify({
+            "error": str(e),
+            "cwd": os.getcwd(),
+            "files_in_cwd": os.listdir('.'),
+            "templates_exists": os.path.exists(TEMPLATE_DIR),
+            "static_exists": os.path.exists(STATIC_DIR)
+        }), 500
 
 @app.route('/<path:path>')
 def serve_static(path):
     try:
+        log(f"Intentando servir: {path}")
+        
         # Intentar servir archivos estáticos
-        static_path = os.path.join(STATIC_DIR, path)
-        if os.path.exists(static_path) and os.path.isfile(static_path):
-            log(f"Sirviendo archivo estático: {path}")
-            return send_from_directory(STATIC_DIR, path)
+        if path.startswith('static/') or '/' in path:
+            static_path = os.path.join(STATIC_DIR, path.replace('static/', ''))
+            if os.path.exists(static_path) and os.path.isfile(static_path):
+                log(f"Sirviendo archivo estático: {static_path}")
+                return send_from_directory(os.path.dirname(static_path), os.path.basename(static_path))
         
         # Si no es un archivo estático, intentar servir el index.html
-        log(f"Archivo no encontrado: {path}, sirviendo index.html")
-        if not os.path.exists(os.path.join(TEMPLATE_DIR, 'index.html')):
-            raise FileNotFoundError(f"No se encontró index.html en {TEMPLATE_DIR}")
+        log("Archivo no encontrado, sirviendo index.html")
         return send_from_directory(TEMPLATE_DIR, 'index.html')
+        
     except Exception as e:
         log(f"Error en serve_static({path}): {str(e)}")
-        return jsonify({"error": str(e), "static_dir": STATIC_DIR, "template_dir": TEMPLATE_DIR}), 500
+        return jsonify({
+            "error": str(e),
+            "path": path,
+            "static_dir": STATIC_DIR,
+            "template_dir": TEMPLATE_DIR,
+            "files_in_static": os.listdir(STATIC_DIR) if os.path.exists(STATIC_DIR) else "No existe",
+            "files_in_templates": os.listdir(TEMPLATE_DIR) if os.path.exists(TEMPLATE_DIR) else "No existe"
+        }), 500
 
-# Manejador para Vercel
 def handler(request, context):
-    from vercel import Response
-    
-    with app.test_request_context(path=request.path, method=request.httpMethod):
-        try:
+    try:
+        log(f"Nueva solicitud: {request.path} {request.httpMethod}")
+        
+        with app.test_request_context(path=request.path, method=request.httpMethod):
             res = app.full_dispatch_request()
-            return Response({
+            return {
                 'statusCode': res.status_code,
                 'headers': dict(res.headers),
                 'body': res.get_data(as_text=True)
-            })
-        except Exception as e:
-            error_info = {
-                'error': str(e),
-                'type': type(e).__name__,
-                'cwd': os.getcwd(),
-                'files_in_root': os.listdir('.'),
-                'templates': os.listdir(TEMPLATE_DIR) if os.path.exists(TEMPLATE_DIR) else 'No existe',
-                'static': os.listdir(STATIC_DIR) if os.path.exists(STATIC_DIR) else 'No existe'
             }
-            log(f"Error en handler: {error_info}")
-            return Response({
-                'statusCode': 500,
-                'body': str(error_info)
-            })
+    except Exception as e:
+        import traceback
+        error_msg = f"Error en handler: {str(e)}\n{traceback.format_exc()}"
+        log(error_msg)
+        return {
+            'statusCode': 500,
+            'body': error_msg
+        }
 
 # Para desarrollo local
 if __name__ == '__main__':
