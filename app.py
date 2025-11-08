@@ -37,15 +37,6 @@ MAIL_RECIPIENT = 'refrigeracionfrisol@gmail.com'
 def home():
     return render_template('index.html')
 
-# Ruta para servir archivos estáticos
-@app.route('/static/<path:path>')
-def serve_static(path):
-    try:
-        return send_from_directory('static', path)
-    except Exception as e:
-        print(f"Error serving static file {path}: {str(e)}")
-        return str(e), 404
-
 # Ruta para el favicon
 @app.route('/favicon.ico')
 def favicon():
