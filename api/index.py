@@ -59,25 +59,46 @@ def home():
         }), 500
 
 # Ruta para archivos estáticos
+@app.route('/static/<path:path>')
+def serve_static_file(path):
+    try:
+        log(f"Sirviendo archivo estático: {path}")
+        return send_from_directory(STATIC_DIR, path)
+    except Exception as e:
+        log(f"Error al servir archivo estático {path}: {str(e)}")
+        return str(e), 404
+
+# Ruta para archivos CSS
+@app.route('/css/<path:path>')
+def serve_css(path):
+    try:
+        return send_from_directory(os.path.join(STATIC_DIR, 'css'), path)
+    except Exception as e:
+        log(f"Error al servir CSS {path}: {str(e)}")
+        return str(e), 404
+
+# Ruta para archivos JS
+@app.route('/js/<path:path>')
+def serve_js(path):
+    try:
+        return send_from_directory(os.path.join(STATIC_DIR, 'js'), path)
+    except Exception as e:
+        log(f"Error al servir JS {path}: {str(e)}")
+        return str(e), 404
+
+# Ruta para cualquier otra ruta
 @app.route('/<path:path>')
-def serve_static(path):
+def serve_any(path):
     try:
         # Si es un archivo estático, intentar servirlo
-        if path.startswith('static/'):
-            static_path = os.path.join(STATIC_DIR, path.replace('static/', ''))
-            if os.path.exists(static_path) and os.path.isfile(static_path):
-                return send_from_directory(os.path.dirname(static_path), os.path.basename(static_path))
+        if path.startswith('static/') or path.startswith('css/') or path.startswith('js/'):
+            return serve_static_file(path.replace('static/', ''))
         
-        # Si no es un archivo estático, servir el index.html
+        # Si no, servir el index.html
         return send_from_directory(TEMPLATE_DIR, 'index.html')
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e),
-            "path": path,
-            "static_dir": STATIC_DIR,
-            "template_dir": TEMPLATE_DIR
-        }), 500
+        log(f"Error en serve_any({path}): {str(e)}")
+        return send_from_directory(TEMPLATE_DIR, 'index.html')
 
 # Manejador para Vercel
 def handler(request, context):
