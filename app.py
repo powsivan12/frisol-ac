@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, request, jsonify, url_for
+from flask import Flask, render_template, send_from_directory, request, jsonify, url_for, send_file
 import os
 import re
 import smtplib
@@ -13,7 +13,11 @@ load_dotenv()
 app = Flask(__name__, 
             template_folder='templates',
             static_folder='static',
-            static_url_path='')  # Esto hace que los archivos estáticos se sirvan desde la raíz
+            static_url_path='')
+
+# Configuración para producción
+app.config['PREFERRED_URL_SCHEME'] = 'https'
+app.config['SERVER_NAME'] = None  # Se establecerá dinámicamente
 
 # Configuración del correo
 MAIL_SERVER = 'smtp.gmail.com'
@@ -30,9 +34,13 @@ def home():
     return render_template('index.html')
 
 # Ruta para servir archivos estáticos
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    return send_from_directory('static', filename)
+@app.route('/static/<path:path>')
+def serve_static(path):
+    try:
+        return send_from_directory('static', path)
+    except Exception as e:
+        print(f"Error serving static file {path}: {str(e)}")
+        return str(e), 404
 
 # Ruta para el favicon
 @app.route('/favicon.ico')
@@ -124,15 +132,12 @@ def enviar_mensaje():
         }), 500
 
 # Iniciar el servidor de desarrollo
+# Crear directorios necesarios
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+os.makedirs(static_dir, exist_ok=True)
+os.makedirs('uploads', exist_ok=True)
+
 if __name__ == '__main__':
-    # Asegurarse de que los directorios existen
-    os.makedirs('static', exist_ok=True)
-    os.makedirs('uploads', exist_ok=True)
-    
-    # Imprimir rutas para depuración
-    print("Ruta de trabajo actual:", os.getcwd())
-    print("Ruta de archivos estáticos:", os.path.join(os.getcwd(), 'static'))
-    print("URL para estilos:", url_for('static', filename='css/styles.css'))
-    
-    # Iniciar la aplicación
+    # Configuración para desarrollo local
+    print("Iniciando en modo desarrollo...")
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
