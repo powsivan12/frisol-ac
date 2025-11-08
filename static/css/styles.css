@@ -361,15 +361,39 @@ nav ul li a:hover:after {
     transform: translateY(-3px);
 }
 
+.contact-form .form-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.contact-form .form-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary-color);
+    font-size: 18px;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.contact-form .textarea-group i {
+    top: 20px;
+    transform: none;
+}
+
 .contact-form input,
 .contact-form textarea {
     width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 20px;
+    padding: 12px 15px 12px 45px;
+    margin-bottom: 0;
     border: 1px solid #ddd;
     border-radius: 5px;
     font-size: 16px;
     transition: all 0.3s ease;
+    background-color: #f9f9f9;
+    position: relative;
+    z-index: 1;
 }
 
 .contact-form input:focus,
@@ -381,11 +405,34 @@ nav ul li a:hover:after {
 
 .contact-form textarea {
     height: 150px;
+    min-height: 120px;
     resize: vertical;
+    padding-top: 15px;
 }
 
-.contact-form button {
+.contact-form .btn {
     width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.contact-form .btn i {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+    position: static;
+    transform: none;
+    color: white;
+}
+
+.contact-form .btn:hover i {
+    transform: translateX(5px);
 }
 
 /* Footer */
@@ -567,11 +614,100 @@ button[type="submit"]:disabled {
     opacity: 0.7;
 }
 
+/* Estilos para las imágenes de servicios */
+.service-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    background-color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.service-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    display: block;
+}
+
+.service-card:hover .service-image img {
+    transform: scale(1.05);
+}
+
+/* Asegurar que las imágenes sean visibles */
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.service-card {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para botones pequeños */
+.btn-small {
+    padding: 8px 20px !important;
+    font-size: 0.9rem !important;
+    margin-top: 15px;
+    display: inline-block;
+}
+
 /* Estilos para campos con error */
 input.error,
 textarea.error {
     border-color: #dc3545 !important;
     box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Estilos para el logo en el encabezado */
+.header-content .logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--primary-color);
+    flex-shrink: 0;
+}
+
+.logo-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.logo-text h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: var(--primary-color);
+}
+
+.logo-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
 }
 
 /* Estilos para el botón de WhatsApp */

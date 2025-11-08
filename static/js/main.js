@@ -110,8 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const animatedElements = document.querySelectorAll('.service-card, .about-content, .contact-container > div');
     animatedElements.forEach(element => {
         element.style.opacity = '0';
-        element.style.transform = 'translateY(30px)';
-        element.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
     });
 
     // Mostrar elementos visibles al cargar
@@ -120,63 +118,93 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Manejo del formulario de contacto
     const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
+    const formMessages = document.getElementById('form-messages');
+
+    if (contactForm && formMessages) {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const formData = new FormData(this);
-            const formMessages = document.getElementById('form-messages');
-            const submitButton = this.querySelector('button[type="submit"]');
-            const originalButtonText = submitButton.innerHTML;
-            
             // Mostrar mensaje de carga
-            formMessages.textContent = 'Enviando mensaje...';
-            formMessages.className = 'form-message form-message-info';
-            formMessages.style.display = 'block';
-            submitButton.disabled = true;
-            submitButton.innerHTML = 'Enviando...';
+            showFormMessage('Enviando mensaje...', 'info');
             
+            // Obtener datos del formulario
+            const formData = {
+                nombre: contactForm.querySelector('[name="nombre"]').value.trim(),
+                email: contactForm.querySelector('[name="email"]').value.trim(),
+                telefono: contactForm.querySelector('[name="telefono"]').value.trim(),
+                mensaje: contactForm.querySelector('[name="mensaje"]').value.trim()
+            };
+
+            // Validar campos requeridos
+            if (!formData.nombre || !formData.email || !formData.mensaje) {
+                showFormMessage('Por favor completa todos los campos requeridos', 'error');
+                return;
+            }
+
+            // Validar formato de email
+            if (!isValidEmail(formData.email)) {
+                showFormMessage('Por favor ingresa un correo electrónico válido', 'error');
+                return;
+            }
+
+            // Deshabilitar el botón de enviar
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Enviando...';
+
+            // Enviar datos al servidor
             fetch('/enviar-mensaje', {
                 method: 'POST',
                 headers: {
-                    'Accept': 'application/json',
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('input[name="csrf_token"]')?.value || ''
                 },
-                body: JSON.stringify(Object.fromEntries(formData))
+                body: JSON.stringify(formData)
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    formMessages.textContent = data.message || '¡Mensaje enviado con éxito!';
-                    formMessages.className = 'form-message form-message-success';
+                    showFormMessage('Mensaje enviado correctamente. ¡Gracias por contactarnos!', 'success');
                     contactForm.reset();
-                    
-                    // Desaparecer el mensaje después de 5 segundos
-                    setTimeout(() => {
-                        formMessages.style.display = 'none';
-                    }, 5000);
                 } else {
-                    let errorMessage = data.message || 'Por favor corrige los siguientes errores:';
-                    if (data.errors) {
-                        errorMessage += '\n';
-                        for (const field in data.errors) {
-                            errorMessage += `- ${data.errors[field].join(', ')}\n`;
-                        }
-                    }
-                    formMessages.textContent = errorMessage;
-                    formMessages.className = 'form-message form-message-error';
+                    throw new Error(data.message || 'Error al enviar el mensaje');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                formMessages.textContent = 'Hubo un error al enviar el mensaje. Por favor, intente nuevamente más tarde.';
-                formMessages.className = 'form-message form-message-error';
+                showFormMessage('Ocurrió un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.', 'error');
             })
             .finally(() => {
+                // Rehabilitar el botón de enviar
                 submitButton.disabled = false;
-                submitButton.innerHTML = originalButtonText;
+                submitButton.textContent = 'Enviar Mensaje';
             });
         });
+    }
+
+    // Función para mostrar mensajes en el formulario
+    function showFormMessage(message, type) {
+        if (!formMessages) return;
+        
+        formMessages.textContent = message;
+        formMessages.className = 'form-message';
+        formMessages.classList.add(type);
+        formMessages.style.display = 'block';
+        
+        // Ocultar mensaje después de 5 segundos (excepto si es un mensaje de éxito)
+        if (type !== 'success') {
+            setTimeout(() => {
+                formMessages.style.opacity = '0';
+                setTimeout(() => {
+                    formMessages.style.display = 'none';
+                    formMessages.style.opacity = '1';
+                }, 300);
+            }, 5000);
+        }
+    }
+
+    // Función para validar email
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
     }
 });

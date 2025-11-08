@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frisol - Expertos en Aire Acondicionado</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Frisol - Expertos en Aire Acondicionado y Refrigeración</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='images/frissol-logo.jpg') }}" type="image/jpg">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/frissol-logo.jpg') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/frissol-logo.jpg') }}" type="image/x-icon">
+    <meta name="theme-color" content="#00a8e8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -13,11 +19,14 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <h1>Frisol</h1>
-                    <p>Expertos en Climatización</p>
+                    <div class="logo-image">
+                        <img src="{{ url_for('static', filename='images/frissol-logo.jpg') }}" alt="Frisol - Expertos en Climatización">
+                    </div>
+                    <div class="logo-text">
+                        <h1>Frissol</h1>
+                        <p>Expertos en Climatización y Refrigeración</p>
+                    </div>
                 </div>
-                <h1>Frisol</h1>
-                <p>Expertos en Climatización</p>
             </div>
 
             <!-- Botón de menú móvil -->
@@ -43,7 +52,7 @@
     <!-- Hero Section -->
     <section id="inicio" class="hero">
         <div class="hero-content">
-            <h2>Expertos en Instalación y Reparación de Aire Acondicionado</h2>
+            <h2>Expertos en Instalación y Reparación de Aire Acondicionado y Refrigeración</h2>
             <p>Servicio rápido, profesional y garantizado</p>
             <a href="#contacto" class="btn">Solicitar Presupuesto</a>
         </div>
@@ -55,19 +64,28 @@
             <h2>Nuestros Servicios</h2>
             <div class="services-grid">
                 <div class="service-card">
-                    <i class="fas fa-tools"></i>
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='images/frissol-reparacion.jpg') }}" alt="Reparación de aire acondicionado" style="width:100%;height:100%;object-fit:cover;">
+                    </div>
                     <h3>Reparación</h3>
                     <p>Reparamos todas las marcas de aires acondicionados con garantía de servicio.</p>
+                    <a href="#contacto" class="btn btn-small">Solicitar Servicio</a>
                 </div>
                 <div class="service-card">
-                    <i class="fas fa-truck"></i>
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='images/frissol-instalacion.jpg') }}" alt="Instalación de aire acondicionado" style="width:100%;height:100%;object-fit:cover;">
+                    </div>
                     <h3>Instalación</h3>
                     <p>Instalación profesional de equipos nuevos con los más altos estándares de calidad.</p>
+                    <a href="#contacto" class="btn btn-small">Cotizar Instalación</a>
                 </div>
                 <div class="service-card">
-                    <i class="fas fa-broom"></i>
+                    <div class="service-image">
+                        <img src="{{ url_for('static', filename='images/frissol-manteniomiento.jpg') }}" alt="Mantenimiento de aire acondicionado" style="width:100%;height:100%;object-fit:cover;">
+                    </div>
                     <h3>Mantenimiento</h3>
                     <p>Limpieza y mantenimiento preventivo para optimizar el rendimiento de tu equipo.</p>
+                    <a href="#contacto" class="btn btn-small">Agendar Mantenimiento</a>
                 </div>
             </div>
         </div>
@@ -96,22 +114,36 @@
             <div class="contact-container">
                 <div class="contact-info">
                     <h3>Información de Contacto</h3>
-                    <p><i class="fas fa-phone"></i> Teléfono: (123) 456-7890</p>
-                    <p><i class="fas fa-envelope"></i> Email: info@frisol.com</p>
-                    <p><i class="fas fa-map-marker-alt"></i> Dirección: Calle Principal #123, Ciudad</p>
+                    <p><i class="fas fa-phone"></i> Teléfono: <a href="tel:7222548197" class="contact-link">(722) 254-8197</a></p>
+                    <p><i class="fas fa-envelope"></i> Email: <a href="mailto:refrigeracionfrisol@gmail.com" class="email-link">refrigeracionfrisol@gmail.com</a></p>
+                    <p><i class="fas fa-map-marker-alt"></i> Dirección: <a href="https://www.google.com/maps/search/Calle+Ignacio+Rayón+SN+Colonia+Alvaro+Obregón+San+Mateo+Atenco+Estado+de+México" target="_blank" class="contact-link">Calle Ignacio Rayón SN Colonia Alvaro Obregón, San Mateo Atenco, Estado de México</a></p>
                     <div class="social-links">
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="https://www.facebook.com/profile.php?id=61580401209801&sk=friends&locale=es_LA" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
                         <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                         <a href="https://wa.me/527223102859" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
                 <form id="contactForm" class="contact-form">
-                    <input type="text" name="nombre" placeholder="Nombre" required>
-                    <input type="email" name="email" placeholder="Email" required>
-                    <input type="tel" name="telefono" placeholder="Teléfono">
-                    <textarea name="mensaje" placeholder="Mensaje" required></textarea>
+                    <div class="form-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="nombre" placeholder="Nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" name="telefono" placeholder="Teléfono">
+                    </div>
+                    <div class="form-group textarea-group">
+                        <i class="fas fa-comment-dots"></i>
+                        <textarea name="mensaje" placeholder="Mensaje" required></textarea>
+                    </div>
                     <div id="form-messages" class="form-message"></div>
-                    <button type="submit" class="btn">Enviar Mensaje</button>
+                    <button type="submit" class="btn">
+                        <i class="fas fa-paper-plane"></i> Enviar Mensaje
+                    </button>
                 </form>
             </div>
         </div>
