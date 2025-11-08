@@ -12,7 +12,8 @@ load_dotenv()
 # Configuración de la aplicación Flask
 app = Flask(__name__, 
             template_folder='templates',
-            static_folder='static')
+            static_folder='static',
+            static_url_path='')  # Esto hace que los archivos estáticos se sirvan desde la raíz
 
 # Configuración del correo
 MAIL_SERVER = 'smtp.gmail.com'
@@ -29,10 +30,18 @@ def home():
     return render_template('index.html')
 
 # Ruta para servir archivos estáticos
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    root_dir = os.path.dirname(os.getcwd())
-    return send_from_directory(os.path.join(root_dir, 'static'), filename)
+@app.route('/<path:path>')
+def serve_static(path):
+    # Si la ruta comienza con 'css/', 'js/' o 'images/', sirve desde static
+    if path.startswith(('css/', 'js/', 'images/')):
+        return send_from_directory('static', path)
+    # Si no, intenta servir el archivo directamente
+    return send_from_directory('static', path)
+
+# Ruta para el favicon
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static', 'images/frissol-logo.jpg', mimetype='image/vnd.microsoft.icon')
 
 # Ruta para el favicon
 @app.route('/favicon.ico')
