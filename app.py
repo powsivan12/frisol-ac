@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, request, jsonify
+from flask import Flask, render_template, send_from_directory, request, jsonify, url_for
 import os
 import re
 import smtplib
@@ -29,9 +29,10 @@ def home():
     return render_template('index.html')
 
 # Ruta para servir archivos estáticos
-@app.route('/static/<path:path>')
-def serve_static(path):
-    return send_from_directory('static', path)
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    root_dir = os.path.dirname(os.getcwd())
+    return send_from_directory(os.path.join(root_dir, 'static'), filename)
 
 # Ruta para el favicon
 @app.route('/favicon.ico')
@@ -126,8 +127,12 @@ def enviar_mensaje():
 if __name__ == '__main__':
     # Asegurarse de que los directorios existen
     os.makedirs('static', exist_ok=True)
-    os.makedirs('templates', exist_ok=True)
+    os.makedirs('uploads', exist_ok=True)
     
-    # Iniciar el servidor
-    print("Iniciando el servidor en http://localhost:5000")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Imprimir rutas para depuración
+    print("Ruta de trabajo actual:", os.getcwd())
+    print("Ruta de archivos estáticos:", os.path.join(os.getcwd(), 'static'))
+    print("URL para estilos:", url_for('static', filename='css/styles.css'))
+    
+    # Iniciar la aplicación
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))

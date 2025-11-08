@@ -1,13 +1,9 @@
 import os
-import sys
-import traceback
+from app import app
 
-def log(message):
-    """Función de ayuda para registrar mensajes en stderr"""
-    print(f"[WSGI] {message}", file=sys.stderr)
-    sys.stderr.flush()
-
-log("Iniciando aplicación WSGI")
+if __name__ == "__main__":
+    # Configuración para desarrollo local
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
 # Configuración de rutas
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
