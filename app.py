@@ -30,23 +30,14 @@ def home():
     return render_template('index.html')
 
 # Ruta para servir archivos estáticos
-@app.route('/<path:path>')
-def serve_static(path):
-    # Si la ruta comienza con 'css/', 'js/' o 'images/', sirve desde static
-    if path.startswith(('css/', 'js/', 'images/')):
-        return send_from_directory('static', path)
-    # Si no, intenta servir el archivo directamente
-    return send_from_directory('static', path)
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('static', filename)
 
 # Ruta para el favicon
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory('static', 'images/frissol-logo.jpg', mimetype='image/vnd.microsoft.icon')
-
-# Ruta para el favicon
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory('static', 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    return send_from_directory('static/images', 'frissol-logo.jpg', mimetype='image/vnd.microsoft.icon')
 
 def send_email(nombre, email, telefono, mensaje):
     try:
